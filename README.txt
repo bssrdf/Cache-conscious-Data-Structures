@@ -1,29 +1,16 @@
 Refereed Cache-Conscious String Data Structures for Strings
 
+This is the complete readme file for my memory-resident string
+data structures, as detailed in my PhD Thesis. Depending on your download,
+you may only have a selection of these data structures.  
+
 Author:  Dr. Nikolas Askitis.
 Email:   askitisn@gmail.com
-Website: http://www.naskitis.com
-
-Please show your support by telling others: www.naskitis.com
-
-/*
- *
- * Permission to use and edit this software is freely granted,
- * provided that this statement is retained.
- *
- * Developed by Dr. Nikolas Askitis
- * Website: www.naskitis.com
- * Email:   askitisn@gmail.com
- *
- * Please visit www.naskitis.com for more information.   If you have
- * any questions regarding my work, do not hesitate to ask.
- *
- * Enjoy!
- *
- */
 
 PUBLICATIONS
 --------------------------------------------------------------------------------------------------------------------
+These data structures are available from the following refereed publications:
+
 1. B-tries for Disk-based String Management, VLDB Journal, Volume 18, Issue 1, Pages 157 - 179, 2009.  ISSN:1066-8888 
 2. Engineering scalable, cache and space efficient tries for strings, VLDB Journal, Published Online, 2010.  DOI: 10.1007/s00778-010-0183-9 ISSN: 1066-8888
 3. HAT-Trie: A Cache-Conscious Trie-Based Data Structure For Strings, The 30th International Australasian Computer Science Conference (ACSC), Volume 62, pages 97 - 105, 2007.  ISSN: 1445-1336
@@ -63,9 +50,11 @@ DATA STRUCTURES
 4.  standard hash table
 5.  array burst-trie        (2 variants)
 6.  standard burst-trie
-7.  HAT-trie
-8.  Judy-trie interface for v1.0.5 (source can be downloaded online).
-
+7.  standard redblack
+8.  standard splay
+9.  HAT-trie
+10. B-trie
+11. B-tree
 
 SOFTWARE VARIANTS
 --------------------------------------------------------------------------------------------------------------------
@@ -74,6 +63,7 @@ a) Hash tables:
 array-hash-exact = array hash table where slots are resized by as many bytes as needed (i.e exact-fit)
 array-hash-page  = array hash table where slots are resized in 64-byte blocks.
 array-hash-exact-mtf = array hash table with exact-fit and move-to-front on access.
+array-hash-32bit-int = array hash table designed for 32-bit integer (binary) keys (with 32-bit integer payload).
 
 b) Burst tries:
 The array burst trie also has the same variants, namely the:
@@ -85,12 +75,12 @@ array-burst-trie-page
 PC ARCHITECTURE (AMD 64-bit or Intel 64-bit Processor)
 ----------------------------------------------------------------------------------------------------------------------
 Developed for x86_64 Linux Platforms on an AMD or Intel based processor.
-I used Kubuntu 10.04 to compile and prepare the software. 
+We used Kubuntu 10.04 to compile and prepare the software. 
 
 Currently, my data structures are designed for 64-bit architectures (hence,
 they assume that pointers are 8-bytes long).  Please note, in my papers, I (mostly)
-used the 32-bit versions, since back then, my primary machine was a 32-bit P4 with 2GB RAM.  
-Check out paper number 2, listed above, for reference of performance on a more modern 64-bit processor.
+used the 32-bit versions, since back then, my primary machine was a 32-bit P4.  Check out
+paper number 2, listed above, for reference of performance on a more modern 64-bit processor.
 
 
 DATA SETS
@@ -115,12 +105,9 @@ test
 ...
 
 
+The 32-bit integer (dictionary) data structures support 4-byte integer datasets (in binary format, that is, 
+non-human readable). They must appear all in one line. 
 
-
-DATASETS
-------------------------------------------------------------------------------------------------------------------------
-
-You can find the string datasets on my homepage (naskitis.com).
 
 
 EXPERIMENTS
@@ -128,9 +115,14 @@ EXPERIMENTS
 
 ./quick_compare.bsh [optional: user-specified file]
 
-This script will run a "quick-compare" benchmark experiment, comparing all these data structures using a user-specified file.
+This script will run a "quick-and-dirty" benchmark experiment, comparing all these data structures using a user-specified file.
 
 You will need a x86_64 Intel/AMD Linux PC with at least 4GB of RAM to run these experiments.  8GB of RAM is recommended.
+
+Eg:
+
+bunzip2 sampleData.bz2;
+./quick_compare.bsh sampleData;
 
 
 TO RUN:
@@ -139,10 +131,11 @@ TO RUN:
 All data structures share the same command-line interface, as follows:
 
 
-<data-structure> [Number of slots or the container size]  <number of datasets to insert>  <datasets to insert (separated by white space)>  <number of datasets to search>  <datasets to search (separated by white space)>
+<data-structure> [Number of slots or the container size] [[ output file name ]]  <number of datasets to insert>  <datasets to insert (separated by white space)>  <number of datasets to search>  <datasets to search (separated by white space)>
 
 
 Parameters within <> brackets are mandatory, whereas those in [] brackets are only required by the hash table(s) and burst trie(s). 
+Parameters in [[ ]] brackets are only required by the B-tree and B-trie.  
 
 1)  Container size:   the number of strings a container must store before it is burst. 
 2)  Number of slots:  the number of slots allocated by the hash table (power of 2). 
@@ -157,11 +150,13 @@ IMPORTANT:
 
 EXAMPLES:
 -----------------------------------------------------------------------------------------------------------------------
-./array-bst 1 /mnt/in/data/file1 2 /mnt/in/data/file1 /tmp/other
+./nikolas_askitis_array_bst 1 /mnt/in/data/file1 2 /mnt/in/data/file1 /tmp/other
 ./standard-bst 1 /mnt/in/data/file1 2 /mnt/in/data/file1 /tmp/other
-./array-burst-trie 256 3 file1 file2 file3 1 file2
-./HAT-trie 16384 1 dataset 1 dataset
-./array-hash 65536 1 skew1.in 1 skew1.in
+./nikolas_askitis_array_burst_trie_exact 256 3 file1 file2 file3 1 file2
+./nikolas_askitis_hat_trie 32768 3500000 1 dataset 1 dataset
+./nikolas_askitis_array_hash 65536 1 skew1.in 1 skew1.in
+./nikolas_askitis_btrie output_file 1 file1 1 file2
+./nikolas_askitis_btree output_file 1 file1 1 file2
 
 OUTPUT:
 ------------------------------------------------------------------------------------------------------------------------
@@ -172,17 +167,17 @@ The output of all data structures are as follows (in order, from left-to-right):
 
 
 2) Total memory (virtual memory): This is the total memory used by the running process, as reported by the operating system. 
-                                  This is a true measure of memory consumption, capturing space lost due to mem. fragmentation
+                                  This is a true measure of memory consumption, capturing space lost due to fragmentation
                                   and other overheads.   This measure does not include the space taken to buffer the
                                   dataset.  If you use the 'top' Linux command, for example, this will capture the same
                                   information, but with the space occupied by the dataset buffer, which can make it
-                                  difficult to see how must space is eaten by the program itself. 
+                                  difficult to see how must space is eaten by the program itself, and not its file buffer. 
 
 
 3) Estimated memory usage:        The total memory, in megabytes, required by the data structure --- the measure
                                   includes the estimated 8-byte allocation overhead imposed by every call to malloc. It
                                   may be slightly less than or more than the virtual memory usage reported (in step 2).
-                               
+                                  For the B-tree and B-trie, this represents the total disk space used.
 
 4) Total insertion time:          The total or elapsed time, in seconds, required by the data structure
                                   to insert the files that were specified on the command line.
@@ -199,7 +194,9 @@ The output of all data structures are as follows (in order, from left-to-right):
 
 8) Number of slots allocated or 
    container threshold:           The number of slots allocated by the hash table or the container threshold (the
-                                  number of strings a container can store prior to bursting) of a burst trie. 
+                                  number of strings a container can store prior to bursting) of a burst trie.  For
+                                  the B-tree and B-trie, this is the bucket size used for leaf nodes, which is
+                                  set to 8192 bytes in this release.
 
 9) Additional (optional) info:    Extra information may be displayed, such as growth policy used and whether
                                   move-to-front is enabled.
@@ -209,13 +206,4 @@ An example (we map the output to the numbers above):
 linux@: ./array-bst 1 28772169  1 28772169 
 Array-BST 774.09 764.92 456.12 423.41 28772169 28772169
    (1)    (2)    (3)    (4)    (5)    (6)      (7)
-
-
-UPDATES
-----------------------------------------------------------------------------------------------------------------------------
-If you have any questions regarding the code, please contact me.
-
-Dr. Nikolas Askitis
-www.naskitis.com
-askitisn@gmail.com
 
